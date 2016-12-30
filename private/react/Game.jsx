@@ -42,9 +42,14 @@ class Game extends React.Component {
 
   renderPlayerSelection () {
     return (
-      <div className="center">
-        <button className="select-btn" onClick={ this.onBoardSelect }>Board</button>
-        <button className="select-btn" onClick={ this.onClueGiverSelect }>Clue giver</button>
+      <div className="splash">
+        <div className="splash-img-div">
+          <img src="public/images/logo.png" />
+        </div>
+        <div className="splash-btns">
+          <div><button onClick={ this.onBoardSelect }>Board</button></div>
+          <div><button onClick={ this.onClueGiverSelect }>Clue giver</button></div>
+        </div>
       </div>
     );
   }
@@ -65,9 +70,15 @@ class Game extends React.Component {
       return (<tr>{ row.map(this.formatWord) }</tr>);
     });
     var score = <div className="scoreboard">
-      <span className="red score">{ this.state.teamOneRemainingWords }</span>
-      <span className={ this.state.turn + " score" }>{ this.state.turn == "red" ? "\u21D0" : "\u21D2" }</span>
-      <span className="blue score">{ this.state.teamTwoRemainingWords }</span>
+      <span className={ "red score" + (this.state.turn == "red" ? " active" : "") }>
+        { this.state.teamOneRemainingWords }
+      </span>
+      <span className={ [this.state.turn, "score", "turn", (this.state.turn == "red" ? "turn-one" : "turn-two")].join(' ') }>
+        { this.state.turn == "red" ? "Party" : "Workers" }
+      </span>
+      <span className={ "blue score" + (this.state.turn == "blue" ? " active" : "") }>
+        { this.state.teamTwoRemainingWords }
+      </span>
     </div>;
     return (<div>
       { score }

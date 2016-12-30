@@ -22426,16 +22426,33 @@
 	    value: function renderPlayerSelection() {
 	      return _react2.default.createElement(
 	        'div',
-	        { className: 'center' },
+	        { className: 'splash' },
 	        _react2.default.createElement(
-	          'button',
-	          { className: 'select-btn', onClick: this.onBoardSelect },
-	          'Board'
+	          'div',
+	          { className: 'splash-img-div' },
+	          _react2.default.createElement('img', { src: 'public/images/logo.png' })
 	        ),
 	        _react2.default.createElement(
-	          'button',
-	          { className: 'select-btn', onClick: this.onClueGiverSelect },
-	          'Clue giver'
+	          'div',
+	          { className: 'splash-btns' },
+	          _react2.default.createElement(
+	            'div',
+	            null,
+	            _react2.default.createElement(
+	              'button',
+	              { onClick: this.onBoardSelect },
+	              'Board'
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            null,
+	            _react2.default.createElement(
+	              'button',
+	              { onClick: this.onClueGiverSelect },
+	              'Clue giver'
+	            )
+	          )
 	        )
 	      );
 	    }
@@ -22474,17 +22491,17 @@
 	        { className: 'scoreboard' },
 	        _react2.default.createElement(
 	          'span',
-	          { className: 'red score' },
+	          { className: "red score" + (this.state.turn == "red" ? " active" : "") },
 	          this.state.teamOneRemainingWords
 	        ),
 	        _react2.default.createElement(
 	          'span',
-	          { className: this.state.turn + " score" },
-	          this.state.turn == "red" ? '\u21D0' : '\u21D2'
+	          { className: [this.state.turn, "score", "turn", this.state.turn == "red" ? "turn-one" : "turn-two"].join(' ') },
+	          this.state.turn == "red" ? "Party" : "Workers"
 	        ),
 	        _react2.default.createElement(
 	          'span',
-	          { className: 'blue score' },
+	          { className: "blue score" + (this.state.turn == "blue" ? " active" : "") },
 	          this.state.teamTwoRemainingWords
 	        )
 	      );
@@ -22605,7 +22622,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".card {\n  border-width: 7px;\n  border-style: solid;\n  border-color: white;\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 20px;\n  padding: 40px 0px;\n  font-size: 43px;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  background: linear-gradient(0deg, #303030, 50%, #404040); }\n\n.clue {\n  border-width: 5px;\n  border-style: solid;\n  width: 19%;\n  height: 19%; }\n\n.red {\n  background-color: #E47C49; }\n\n.blue {\n  background-color: #6FACF8; }\n\n.civ {\n  background-color: #C6C6C6; }\n\n.assassin {\n  color: red;\n  background-color: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 25px;\n  border-collapse: separate; }\n\n.clue-div {\n  position: absolute;\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.select-btn {\n  padding: 15px;\n  margin: 5px; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex;\n  padding: 0 21% 0 21%; }\n\n.score {\n  border-width: 7px;\n  border-style: solid;\n  border-color: white;\n  border-radius: 20px;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  color: black;\n  font-size: 100px;\n  margin: auto;\n  padding: 20px 50px;\n  position: relative; }\n", ""]);
+	exports.push([module.id, ".card {\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 10px;\n  padding: 2.1% 0px;\n  font-size: 2.4vw;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  color: #F2AA00;\n  background: linear-gradient(0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.6));\n  box-shadow: inset 0 0 1px #000000;\n  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26); }\n\n.clue {\n  border-width: 5px;\n  border-style: solid;\n  width: 19%;\n  height: 19%; }\n\n.red {\n  color: white;\n  background: linear-gradient(0deg, #7D2014, 50%, #AB2B1A); }\n\n.blue {\n  color: white;\n  background: linear-gradient(0deg, #3E2407, 50%, #5D4631); }\n\n.civ {\n  color: #5C1A1A;\n  background: linear-gradient(0deg, #878787, 50%, #B8B8B8); }\n\n.assassin {\n  color: red;\n  background: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 1.3vw;\n  border-collapse: separate; }\n\n.clue-div {\n  position: absolute;\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.splash {\n  display: flex;\n  flex-direction: column; }\n  .splash img {\n    max-width: 100%;\n    max-height: 100%; }\n\n.splash-img-div {\n  display: flex;\n  align-items: center;\n  height: 50vh;\n  margin: auto; }\n\n.splash-btns {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  align-items: center;\n  height: 50vh; }\n  .splash-btns div {\n    width: 250px; }\n    .splash-btns div button {\n      display: block;\n      padding: 15px;\n      margin: auto; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex;\n  padding: 0 21% 0 21%; }\n\n.score {\n  border-radius: 10px;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  color: white;\n  font-size: 5vw;\n  margin: auto;\n  padding: 20px 50px;\n  position: relative; }\n\n.active {\n  box-shadow: inset 0 0 40px #FFFFFF; }\n\n.turn {\n  text-align: center;\n  width: 32%;\n  font-size: 4vw; }\n\n.turn-one:after, .turn-one:before {\n  right: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-one:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-right-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-one:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-right-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n\n.turn-two:after, .turn-one:before {\n  left: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-two:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-left-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-two:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-left-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n", ""]);
 	
 	// exports
 

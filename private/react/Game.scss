@@ -1,19 +1,17 @@
 .card {
-  border: {
-    width: 7px;
-    style: solid;
-    color: white;
-  }
   height: 20%;
   text-align: center;
   width: 15%;
-  border-radius: 20px;
-  padding: 40px 0px;
-  font-size: 43px;
+  border-radius: 10px;
+  padding: 2.1% 0px;
+  font-size: 2.4vw;
   font-weight: bold;
   font-style: italic;
   font-family: arial;
-  background: linear-gradient( 0deg, #303030, 50%, #404040 );
+  color: #F2AA00;
+  background: linear-gradient( 0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.60) );
+  box-shadow: inset 0 0 1px #000000;
+  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26);
 }
 .clue {
   border: {
@@ -25,24 +23,27 @@
   height: 19%;
 }
 .red {
-  background-color: #E47C49;
+  color: white;
+  background: linear-gradient( 0deg, #7D2014, 50%, #AB2B1A );
 }
 .blue {
-  background-color: #6FACF8;
+  color: white;
+  background: linear-gradient( 0deg, #3E2407, 50%, #5D4631 );
 }
 .civ {
-  background-color: #C6C6C6;
+  color: #5C1A1A;
+  background: linear-gradient( 0deg, #878787, 50%, #B8B8B8 );
 }
 .assassin {
   color: red;
-  background-color: black;
+  background: black;
 }
 .turn {
   background-color: darkslategray;
 }
 .game-table {
   width: 100%;
-  border-spacing: 25px;
+  border-spacing: 1.3vw;
   border-collapse: separate;
 }
 .clue-div {
@@ -59,9 +60,34 @@
   height: 100%;  
   border-collapse: collapse;
 }
-.select-btn {
-  padding: 15px;
-  margin: 5px;
+.splash {
+  display: flex;
+  flex-direction: column;
+  img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+.splash-img-div {
+  display: flex;
+  align-items: center;
+  height: 50vh;
+  margin: auto;
+}
+.splash-btns {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+  align-items: center;
+  height: 50vh;
+  div {
+    width: 250px;
+    button {
+      display: block;
+      padding: 15px;
+      margin: auto;
+    }
+  }
 }
 .game-div {
   height: 74vh;
@@ -81,18 +107,65 @@
   padding: 0 21% 0 21%;
 }
 .score {
-  border: {
-    width: 7px;
-    style: solid;
-    color: white;
-    radius: 20px
-  }
+  border-radius: 10px;
   font-weight: bold;
   font-style: italic;
   font-family: arial;
-  color: black;
-  font-size: 100px;
+  color: white;
+  font-size: 5vw;
   margin: auto;
   padding: 20px 50px;
   position: relative;
+}
+.active {
+  box-shadow: inset 0 0 40px #FFFFFF;
+}
+.turn {
+  text-align: center;
+  width: 32%; 
+  font-size: 4vw;
+}
+.turn-one:after, .turn-one:before {
+  right: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.turn-one:after {
+  border-color: rgba(136, 183, 213, 0);
+  border-right-color: #88b7d5;
+  border-width: 30px;
+  margin-top: -30px;
+}
+.turn-one:before {
+  border-color: rgba(194, 225, 245, 0);
+  border-right-color: #c2e1f5;
+  border-width: 36px;
+  margin-top: -36px;
+}
+.turn-two:after, .turn-one:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.turn-two:after {
+  border-color: rgba(136, 183, 213, 0);
+  border-left-color: #88b7d5;
+  border-width: 30px;
+  margin-top: -30px;
+}
+.turn-two:before {
+  border-color: rgba(194, 225, 245, 0);
+  border-left-color: #c2e1f5;
+  border-width: 36px;
+  margin-top: -36px;
 }
