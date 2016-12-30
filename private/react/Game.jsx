@@ -8,11 +8,24 @@ class Game extends React.Component {
     this.onBoardSelect = this.onBoardSelect.bind(this);
     this.onClueGiverSelect = this.onClueGiverSelect.bind(this);
     this.props.socket.on('game_state', (data) => {
-      this.setState({ gameState: data.board });
+      this.setState({
+        gameState: data.board,
+        teamOneRemainingWords: data.team_data.one.remaining_words,
+        teamTwoRemainingWords: data.team_data.two.remaining_words,
+        isPaused: data.is_paused,
+        isOver: data.is_over,
+        turn: data.turn
+      });
     });
     this.props.socket.on('clues', (data) => {
-      console.log(data);
-      this.setState({ clues: data.clues });
+      this.setState({
+        clues: data.board,
+        teamOneRemainingWords: data.team_data.one.remaining_words,
+        teamTwoRemainingWords: data.team_data.two.remaining_words,
+        isPaused: data.is_paused,
+        isOver: data.is_over,
+        turn: data.turn
+      });
     });
   }
 
@@ -37,15 +50,33 @@ class Game extends React.Component {
   }
 
   formatWord (word) {
-    return (<td key={ word.word } className={ "card " + (word.color || "") }><span className={ word.color ? "hidden" : "" }>{ word.word.toUpperCase() }</span></td>);
+    var text = word.word.charAt(0).toUpperCase() + word.word.slice(1);
+    if (word.color == "civ") {
+      text = "X";
+    }
+    var should_hide = word.color && (word.color != "civ" && word.color != "assassin");
+    return (<td key={ word.word } className={ "card " + (word.color || "") }>
+      <span className={ should_hide ? "hidden" : "" }>{ text }</span>
+    </td>);
   }
 
   renderGameBoard () {
     var board = this.state.gameState.map((row) => {
       return (<tr>{ row.map(this.formatWord) }</tr>);
     });
-    var counter = <div className="scoreboard"><span>Red: 5</span><span>Blue: 6</span></div>;
-    return (<div>{ counter }<div className="center"><table className="game-table">{ board }</table></div></div>);
+    var score = <div className="scoreboard">
+      <span className="red score">{ this.state.teamOneRemainingWords }</span>
+      <span className={ this.state.turn + " score" }>{ this.state.turn == "red" ? "\u21D0" : "\u21D2" }</span>
+      <span className="blue score">{ this.state.teamTwoRemainingWords }</span>
+    </div>;
+    return (<div>
+      { score }
+      <div className="game-div">
+        <div className="center">
+          <table className="game-table">{ board }</table>
+        </div>
+      </div>
+    </div>);
   }
 
   handleClueClick(i, j) {

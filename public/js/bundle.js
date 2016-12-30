@@ -22386,11 +22386,24 @@
 	    _this.onBoardSelect = _this.onBoardSelect.bind(_this);
 	    _this.onClueGiverSelect = _this.onClueGiverSelect.bind(_this);
 	    _this.props.socket.on('game_state', function (data) {
-	      _this.setState({ gameState: data.board });
+	      _this.setState({
+	        gameState: data.board,
+	        teamOneRemainingWords: data.team_data.one.remaining_words,
+	        teamTwoRemainingWords: data.team_data.two.remaining_words,
+	        isPaused: data.is_paused,
+	        isOver: data.is_over,
+	        turn: data.turn
+	      });
 	    });
 	    _this.props.socket.on('clues', function (data) {
-	      console.log(data);
-	      _this.setState({ clues: data.clues });
+	      _this.setState({
+	        clues: data.board,
+	        teamOneRemainingWords: data.team_data.one.remaining_words,
+	        teamTwoRemainingWords: data.team_data.two.remaining_words,
+	        isPaused: data.is_paused,
+	        isOver: data.is_over,
+	        turn: data.turn
+	      });
 	    });
 	    return _this;
 	  }
@@ -22429,13 +22442,18 @@
 	  }, {
 	    key: 'formatWord',
 	    value: function formatWord(word) {
+	      var text = word.word.charAt(0).toUpperCase() + word.word.slice(1);
+	      if (word.color == "civ") {
+	        text = "X";
+	      }
+	      var should_hide = word.color && word.color != "civ" && word.color != "assassin";
 	      return _react2.default.createElement(
 	        'td',
 	        { key: word.word, className: "card " + (word.color || "") },
 	        _react2.default.createElement(
 	          'span',
-	          { className: word.color ? "hidden" : "" },
-	          word.word.toUpperCase()
+	          { className: should_hide ? "hidden" : "" },
+	          text
 	        )
 	      );
 	    }
@@ -22451,31 +22469,40 @@
 	          row.map(_this2.formatWord)
 	        );
 	      });
-	      var counter = _react2.default.createElement(
+	      var score = _react2.default.createElement(
 	        'div',
 	        { className: 'scoreboard' },
 	        _react2.default.createElement(
 	          'span',
-	          null,
-	          'Red: 5'
+	          { className: 'red score' },
+	          this.state.teamOneRemainingWords
 	        ),
 	        _react2.default.createElement(
 	          'span',
-	          null,
-	          'Blue: 6'
+	          { className: this.state.turn + " score" },
+	          this.state.turn == "red" ? '\u21D0' : '\u21D2'
+	        ),
+	        _react2.default.createElement(
+	          'span',
+	          { className: 'blue score' },
+	          this.state.teamTwoRemainingWords
 	        )
 	      );
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        counter,
+	        score,
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'center' },
+	          { className: 'game-div' },
 	          _react2.default.createElement(
-	            'table',
-	            { className: 'game-table' },
-	            board
+	            'div',
+	            { className: 'center' },
+	            _react2.default.createElement(
+	              'table',
+	              { className: 'game-table' },
+	              board
+	            )
 	          )
 	        )
 	      );
@@ -22578,7 +22605,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".card {\n  border-width: 4px;\n  border-style: solid;\n  border-color: #565555;\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 20px;\n  padding: 64px;\n  font-size: 30px;\n  font-weight: bold;\n  font-family: sans-serif;\n  background-color: ivory; }\n\n.clue {\n  border-width: 5px;\n  border-style: solid;\n  width: 19%;\n  height: 19%; }\n\n.red {\n  background-color: #973030; }\n\n.blue {\n  background-color: #283A65; }\n\n.civ {\n  background-color: #979730; }\n\n.assassin {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 25px;\n  border-collapse: separate; }\n\n.clue-div {\n  position: absolute;\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.select-btn {\n  padding: 15px;\n  margin: 5px; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  visibility: hidden; }\n\n.scoreboard {\n  background-color: white;\n  border-width: 2px;\n  border-style: solid;\n  border-color: #565555; }\n", ""]);
+	exports.push([module.id, ".card {\n  border-width: 7px;\n  border-style: solid;\n  border-color: white;\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 20px;\n  padding: 40px 0px;\n  font-size: 43px;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  background: linear-gradient(0deg, #303030, 50%, #404040); }\n\n.clue {\n  border-width: 5px;\n  border-style: solid;\n  width: 19%;\n  height: 19%; }\n\n.red {\n  background-color: #E47C49; }\n\n.blue {\n  background-color: #6FACF8; }\n\n.civ {\n  background-color: #C6C6C6; }\n\n.assassin {\n  color: red;\n  background-color: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 25px;\n  border-collapse: separate; }\n\n.clue-div {\n  position: absolute;\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  position: absolute;\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.select-btn {\n  padding: 15px;\n  margin: 5px; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex;\n  padding: 0 21% 0 21%; }\n\n.score {\n  border-width: 7px;\n  border-style: solid;\n  border-color: white;\n  border-radius: 20px;\n  font-weight: bold;\n  font-style: italic;\n  font-family: arial;\n  color: black;\n  font-size: 100px;\n  margin: auto;\n  padding: 20px 50px;\n  position: relative; }\n", ""]);
 	
 	// exports
 

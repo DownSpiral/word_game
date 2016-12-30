@@ -20,19 +20,28 @@ io.on('connection', function(socket) {
 
   socket.on('board', function(socket){
     console.log("Board selected");
-    io.emit('game_state', { board: game.get_board_state() });
+    io.emit('game_state', game.game_state());
   });
 
   socket.on('clue_giver', function(socket){
     console.log("Clue giver selected");
-    io.emit('clues', { clues: game.get_clues() });
+    io.emit('clues', game.game_state(true));
   });
 
   socket.on('reveal', function(data) {
     console.log("revealing:", data);
     game.reveal(data);
-    io.emit('game_state', { board: game.get_board_state() });
+    io.emit('game_state', game.game_state());
   });
+
+  socket.on('reset', function() {
+    game.reset();
+    io.emit('game_state', game.game_state());
+  });
+
+  //for debugging purposes
+  io.emit('game_state', game.game_state());
+  io.emit('clues', game.game_state(true));
 });
 
 
