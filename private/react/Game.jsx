@@ -47,8 +47,12 @@ class Game extends React.Component {
           <img src="public/images/logo.png" />
         </div>
         <div className="splash-btns">
-          <div><button onClick={ this.onBoardSelect }>Board</button></div>
-          <div><button onClick={ this.onClueGiverSelect }>Clue giver</button></div>
+          <div onClick={ this.onClueGiverSelect }>
+            <img src="public/images/icons/Display-Spymaster.png" />
+          </div>
+          <div onClick={ this.onBoardSelect }>
+            <img src="public/images/icons/Display-Team.png" />
+          </div>
         </div>
       </div>
     );
@@ -65,23 +69,29 @@ class Game extends React.Component {
     </td>);
   }
 
+  renderScoreBoard () {
+    if (this.state.player == "board") {
+      var team_name = <span className={ [this.state.turn, "score", "turn", (this.state.turn == "red" ? "turn-one" : "turn-two")].join(' ') }>
+        { this.state.turn == "red" ? "Party" : "Workers" }
+      </span>;
+    }
+    return (<div className={ (this.state.player == "clue_giver" ? "controls" : "scoreboard") }>
+      <span className={ "red score" + (this.state.turn == "red" ? " active" : "") }>
+        { this.state.teamOneRemainingWords }
+      </span>
+      { team_name }
+      <span className={ "blue score" + (this.state.turn == "blue" ? " active" : "") }>
+        { this.state.teamTwoRemainingWords }
+      </span>
+    </div>);
+  }
+
   renderGameBoard () {
     var board = this.state.gameState.map((row) => {
       return (<tr>{ row.map(this.formatWord) }</tr>);
     });
-    var score = <div className="scoreboard">
-      <span className={ "red score" + (this.state.turn == "red" ? " active" : "") }>
-        { this.state.teamOneRemainingWords }
-      </span>
-      <span className={ [this.state.turn, "score", "turn", (this.state.turn == "red" ? "turn-one" : "turn-two")].join(' ') }>
-        { this.state.turn == "red" ? "Party" : "Workers" }
-      </span>
-      <span className={ "blue score" + (this.state.turn == "blue" ? " active" : "") }>
-        { this.state.teamTwoRemainingWords }
-      </span>
-    </div>;
     return (<div>
-      { score }
+      { this.renderScoreBoard() }
       <div className="game-div">
         <div className="center">
           <table className="game-table">{ board }</table>
@@ -94,20 +104,38 @@ class Game extends React.Component {
     this.props.socket.emit('reveal', { x: j, y: i });
   }
 
+  handleReset() {
+    this.props.socket.emit('reset');
+  }
+
+  handlePass() {
+    this.props.socket.emit('pass_turn');
+  }
+
   renderClueGiver () {
     var clue_rows = this.state.clues.map((row, i) => {
       return (<tr>{ row.map((word, j) => {
+        var text = word.word.charAt(0).toUpperCase() + word.word.slice(1);
         return (<td
           onClick={ this.handleClueClick.bind(this, i, j) }
           key={ word.word }
           className={ "clue " + word.color }
-        />);
+        >{ text }</td>);
       }) }</tr>);
     });
-    return (<div className="center">
-      <div className="clue-div">
-        <table className="clue-table">{ clue_rows }</table>
+    var controls = <div className="controls">
+      <button onClick={ this.handleReset.bind(this) }>Reset</button>
+      <button>Play</button>
+      <button onClick={ this.handlePass.bind(this) }>Pass</button>
+    </div>;
+    return (<div className="clue-giver">
+      { this.renderScoreBoard() }
+      <div className="clue-wrapper center">
+        <div className="clue-div">
+          <table className="clue-table">{ clue_rows }</table>
+        </div>
       </div>
+      { controls }
     </div>);
   }
 

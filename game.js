@@ -89,6 +89,10 @@ game.prototype.reset = function() {
   this.initialize();
 }
 
+game.prototype.pass_turn = function() {
+  this.turn = (this.turn == "red" ? "blue" : "red")
+}
+
 game.prototype.game_state = function(with_clues) {
   return {
     board: this.get_board_state(with_clues),

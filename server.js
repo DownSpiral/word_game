@@ -37,6 +37,12 @@ io.on('connection', function(socket) {
   socket.on('reset', function() {
     game.reset();
     io.emit('game_state', game.game_state());
+    io.emit('clues', game.game_state(true));
+  });
+
+  socket.on('pass_turn', function() {
+    game.pass_turn();
+    io.emit('game_state', game.game_state());
   });
 
   //for debugging purposes
