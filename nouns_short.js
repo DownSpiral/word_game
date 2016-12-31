@@ -432,7 +432,6 @@ exports.nouns_short_list = [
 'pen',
 'pencil',
 'pendulum',
-'penis',
 'penny',
 'pepper',
 'personal',
