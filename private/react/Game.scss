@@ -6,18 +6,17 @@
   padding: 2.1% 0px;
   font-size: 2.4vw;
   font-weight: bold;
-  font-style: italic;
   font-family: arial;
   color: #F2AA00;
   background: linear-gradient( 0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.60) );
   box-shadow: inset 0 0 1px #000000;
   text-shadow: 0 0 1em rgba(255, 131, 0, 0.26);
 }
-.red {
+.one {
   color: white;
   background: linear-gradient( 0deg, #7D2014, 50%, #AB2B1A );
 }
-.blue {
+.two {
   color: white;
   background: linear-gradient( 0deg, #3E2407, 50%, #5D4631 );
 }
@@ -46,7 +45,6 @@ div.controls {
     background: #2B2B2B;
     border-radius: 10px;
     font-weight: bold;
-    font-style: italic;
     font-family: arial;
     color: white;
     font-size: 5vw;
@@ -58,7 +56,6 @@ div.clue-wrapper {
   height: 70vh;
 }
 .clue-div {
-  position: absolute;
   margin: auto;
   width: 96vm;
   height: 96vm;
@@ -66,15 +63,13 @@ div.clue-wrapper {
   height: 96vmin;
 }
 .clue-table {
-  position: absolute;
   width: 100%;
   height: 100%;  
   border-collapse: collapse;
 }
 .clue {
   text-align: center;
-  font-size: 3vw;
-  font-style: italic;
+  font-size: 3.4vw;
   font-family: arial;
   border: {
     width: 5px;
@@ -133,7 +128,6 @@ div.clue-wrapper {
 .score {
   border-radius: 10px;
   font-weight: bold;
-  font-style: italic;
   font-family: arial;
   color: white;
   font-size: 5vw;

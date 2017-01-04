@@ -9,16 +9,16 @@ game.prototype.initialize = function() {
   this.guessing_players = {};
   this.spy_master_players = {};
   this.words = this.generate_words();
-  this.turn = _.sample(['red', 'blue']);
+  this.turn = _.sample(['one', 'two']);
   this.card = this.generate_card(this.turn);
   this.guess_state = this.generate_initial_guess_state();
-  this.score = { red: 0, blue: 0 };
+  this.score = { one: 0, two: 0 };
   this.is_over = false;
   this.is_paused = true;
   var game_time = 60 * 20;
   this.team_data = {
-    one: { time: game_time/2, remaining_words: 8 + (this.turn == 'red' ? 1 : 0) },
-    two: { time: game_time/2, remaining_words: 8 + (this.turn == 'blue' ? 1 : 0) }
+    one: { time: game_time/2, remaining_words: 8 + (this.turn == 'one' ? 1 : 0) },
+    two: { time: game_time/2, remaining_words: 8 + (this.turn == 'two' ? 1 : 0) }
   };
 }
 
@@ -40,17 +40,17 @@ game.prototype.generate_initial_guess_state = function() {
 }
 
 game.prototype.generate_card = function(starting_color) {
-  var red_count = 8 + (starting_color == 'red' ? 1 : 0);
-  var blue_count = 8 + (starting_color == 'blue' ? 1 : 0);
+  var one_count = 8 + (starting_color == 'one' ? 1 : 0);
+  var two_count = 8 + (starting_color == 'two' ? 1 : 0);
   var card = ['assassin'];
   for (var i = 0; i < 7; i++) {
     card = card.concat('civ');
   }
-  for (var i = 0; i < red_count; i++) {
-    card = card.concat('red');
+  for (var i = 0; i < one_count; i++) {
+    card = card.concat('one');
   }
-  for (var i = 0; i < blue_count; i++) {
-    card = card.concat('blue');
+  for (var i = 0; i < two_count; i++) {
+    card = card.concat('two');
   }
   card = _.shuffle(card);
   return  _.values(_.groupBy(card, function(v, i) { return i % 5; }));
@@ -71,15 +71,15 @@ game.prototype.reveal = function(coords) {
   if (this.guess_state[coords.y][coords.x] == 0) {
     this.guess_state[coords.y][coords.x] = 1;
     if (this.card[coords.y][coords.x] != this.turn) {
-      this.turn = (this.turn == "red" ? "blue" : "red");
+      this.turn = (this.turn == "one" ? "two" : "one");
       if (this.card[coords.y][coords.x] == this.turn) {
-        this.team_data[this.turn == "red" ? "one" : "two"].remaining_words -= 1;
+        this.team_data[this.turn == "one" ? "one" : "two"].remaining_words -= 1;
       }
       if (this.card[coords.y][coords.x] == "assassin") {
         this.is_over = true;
       }
     } else {
-      this.team_data[this.turn == "red" ? "one" : "two"].remaining_words -= 1;
+      this.team_data[this.turn == "one" ? "one" : "two"].remaining_words -= 1;
 
     }
   }
@@ -90,7 +90,7 @@ game.prototype.reset = function() {
 }
 
 game.prototype.pass_turn = function() {
-  this.turn = (this.turn == "red" ? "blue" : "red")
+  this.turn = (this.turn == "one" ? "two" : "one")
 }
 
 game.prototype.game_state = function(with_clues) {

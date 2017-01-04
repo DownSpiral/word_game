@@ -71,16 +71,16 @@ class Game extends React.Component {
 
   renderScoreBoard () {
     if (this.state.player == "board") {
-      var team_name = <span className={ [this.state.turn, "score", "turn", (this.state.turn == "red" ? "turn-one" : "turn-two")].join(' ') }>
-        { this.state.turn == "red" ? "Party" : "Workers" }
+      var team_name = <span className={ [this.state.turn, "score", "turn", (this.state.turn == "one" ? "turn-one" : "turn-two")].join(' ') }>
+        { this.state.turn == "one" ? "Party" : "Workers" }
       </span>;
     }
     return (<div className={ (this.state.player == "clue_giver" ? "controls" : "scoreboard") }>
-      <span className={ "red score" + (this.state.turn == "red" ? " active" : "") }>
+      <span className={ "one score" + (this.state.turn == "one" ? " active" : "") }>
         { this.state.teamOneRemainingWords }
       </span>
       { team_name }
-      <span className={ "blue score" + (this.state.turn == "blue" ? " active" : "") }>
+      <span className={ "two score" + (this.state.turn == "two" ? " active" : "") }>
         { this.state.teamTwoRemainingWords }
       </span>
     </div>);
@@ -120,7 +120,7 @@ class Game extends React.Component {
           onClick={ this.handleClueClick.bind(this, i, j) }
           key={ word.word }
           className={ "clue " + word.color }
-        >{ text }</td>);
+        >{ this.state.gameState[i][j].color ? "" : text }</td>);
       }) }</tr>);
     });
     var controls = <div className="controls">
