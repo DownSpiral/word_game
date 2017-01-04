@@ -45,6 +45,11 @@ io.on('connection', function(socket) {
     io.emit('game_state', game.game_state());
   });
 
+  socket.on('play_pause', function() {
+    game.play_pause();
+    io.emit('game_state', game.game_state());
+  });
+
   //for debugging purposes
   io.emit('game_state', game.game_state());
   io.emit('clues', game.game_state(true));

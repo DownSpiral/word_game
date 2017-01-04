@@ -22389,7 +22389,9 @@
 	      _this.setState({
 	        gameState: data.board,
 	        teamOneRemainingWords: data.team_data.one.remaining_words,
+	        teamOneRemainingTime: data.team_data.one.time,
 	        teamTwoRemainingWords: data.team_data.two.remaining_words,
+	        teamTwoRemainingTime: data.team_data.two.time,
 	        isPaused: data.is_paused,
 	        isOver: data.is_over,
 	        turn: data.turn
@@ -22399,7 +22401,9 @@
 	      _this.setState({
 	        clues: data.board,
 	        teamOneRemainingWords: data.team_data.one.remaining_words,
+	        teamOneRemainingTime: data.team_data.one.time,
 	        teamTwoRemainingWords: data.team_data.two.remaining_words,
+	        teamTwoRemainingTime: data.team_data.two.time,
 	        isPaused: data.is_paused,
 	        isOver: data.is_over,
 	        turn: data.turn
@@ -22409,6 +22413,28 @@
 	  }
 	
 	  _createClass(Game, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var intervalId = setInterval(this.timer.bind(this), 1000);
+	      this.setState({ intervalId: intervalId });
+	    }
+	  }, {
+	    key: 'componentWillUnmount',
+	    value: function componentWillUnmount() {
+	      clearInterval(this.state.intervalId);
+	    }
+	  }, {
+	    key: 'timer',
+	    value: function timer() {
+	      if (this.state.isPaused == false) {
+	        if (this.state.turn == "one" && this.state.teamOneRemainingTime > 0) {
+	          this.setState({ teamOneRemainingTime: this.state.teamOneRemainingTime - 1 });
+	        } else if (this.state.turn == "two" && this.state.teamTwoRemainingTime > 0) {
+	          this.setState({ teamTwoRemainingTime: this.state.teamTwoRemainingTime - 1 });
+	        }
+	      }
+	    }
+	  }, {
 	    key: 'onBoardSelect',
 	    value: function onBoardSelect() {
 	      this.props.socket.emit('board', {});
@@ -22467,6 +22493,13 @@
 	      );
 	    }
 	  }, {
+	    key: 'formatTime',
+	    value: function formatTime(seconds) {
+	      var m = String(Math.floor(seconds / 60));
+	      var s = String(seconds % 60);
+	      return m + ":" + (s.length > 1 ? "" : "0") + s;
+	    }
+	  }, {
 	    key: 'renderScoreBoard',
 	    value: function renderScoreBoard() {
 	      if (this.state.player == "board") {
@@ -22476,9 +22509,20 @@
 	          this.state.turn == "one" ? "Party" : "Workers"
 	        );
 	      }
+	      var team_one_time = _react2.default.createElement(
+	        'span',
+	        { className: "one score" + (this.state.turn == "one" ? " active" : "") },
+	        this.formatTime(this.state.teamOneRemainingTime)
+	      );
+	      var team_two_time = _react2.default.createElement(
+	        'span',
+	        { className: "two score" + (this.state.turn == "two" ? " active" : "") },
+	        this.formatTime(this.state.teamTwoRemainingTime)
+	      );
 	      return _react2.default.createElement(
 	        'div',
 	        { className: this.state.player == "clue_giver" ? "controls" : "scoreboard" },
+	        team_one_time,
 	        _react2.default.createElement(
 	          'span',
 	          { className: "one score" + (this.state.turn == "one" ? " active" : "") },
@@ -22489,7 +22533,8 @@
 	          'span',
 	          { className: "two score" + (this.state.turn == "two" ? " active" : "") },
 	          this.state.teamTwoRemainingWords
-	        )
+	        ),
+	        team_two_time
 	      );
 	    }
 	  }, {
@@ -22539,6 +22584,11 @@
 	      this.props.socket.emit('pass_turn');
 	    }
 	  }, {
+	    key: 'handlePlayPause',
+	    value: function handlePlayPause() {
+	      this.props.socket.emit('play_pause');
+	    }
+	  }, {
 	    key: 'renderClueGiver',
 	    value: function renderClueGiver() {
 	      var _this3 = this;
@@ -22571,8 +22621,8 @@
 	        ),
 	        _react2.default.createElement(
 	          'button',
-	          null,
-	          'Play'
+	          { onClick: this.handlePlayPause.bind(this) },
+	          this.state.isPaused ? "Play" : "Pause"
 	        ),
 	        _react2.default.createElement(
 	          'button',
@@ -22661,7 +22711,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".card {\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 10px;\n  padding: 2.1% 0px;\n  font-size: 2.4vw;\n  font-weight: bold;\n  font-family: arial;\n  color: #F2AA00;\n  background: linear-gradient(0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.6));\n  box-shadow: inset 0 0 1px #000000;\n  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26); }\n\n.one {\n  color: white;\n  background: linear-gradient(0deg, #7D2014, 50%, #AB2B1A); }\n\n.two {\n  color: white;\n  background: linear-gradient(0deg, #3E2407, 50%, #5D4631); }\n\n.civ {\n  color: #5C1A1A;\n  background: linear-gradient(0deg, #878787, 50%, #B8B8B8); }\n\n.assassin {\n  color: red;\n  background: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 1.3vw;\n  border-collapse: separate; }\n\ndiv.controls {\n  height: 15vh;\n  display: flex;\n  justify-content: space-around;\n  align-items: center; }\n  div.controls button {\n    background: #2B2B2B;\n    border-radius: 10px;\n    font-weight: bold;\n    font-family: arial;\n    color: white;\n    font-size: 5vw;\n    height: 75%;\n    width: 25%; }\n\ndiv.clue-wrapper {\n  height: 70vh; }\n\n.clue-div {\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.clue {\n  text-align: center;\n  font-size: 3.4vw;\n  font-family: arial;\n  border-width: 5px;\n  border-style: solid;\n  border-color: black;\n  width: 19%;\n  height: 19%; }\n\n.splash {\n  display: flex;\n  flex-direction: column; }\n  .splash img {\n    max-width: 100%;\n    max-height: 100%; }\n\n.splash-img-div {\n  display: flex;\n  align-items: center;\n  height: 50vh;\n  margin: auto; }\n\n.splash-btns {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  align-items: center;\n  height: 50vh; }\n  .splash-btns div img {\n    display: block;\n    margin: auto;\n    max-width: 100%;\n    max-height: 100%; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex;\n  padding: 0 21% 0 21%; }\n\n.score {\n  border-radius: 10px;\n  font-weight: bold;\n  font-family: arial;\n  color: white;\n  font-size: 5vw;\n  margin: auto;\n  padding: 20px 50px;\n  position: relative; }\n\n.active {\n  box-shadow: inset 0 0 40px #FFFFFF; }\n\n.turn {\n  text-align: center;\n  width: 32%;\n  font-size: 4vw; }\n\n.turn-one:after, .turn-one:before {\n  right: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-one:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-right-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-one:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-right-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n\n.turn-two:after, .turn-one:before {\n  left: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-two:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-left-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-two:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-left-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n", ""]);
+	exports.push([module.id, ".card {\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 10px;\n  padding: 2.1% 0px;\n  font-size: 2.4vw;\n  font-weight: bold;\n  font-family: arial;\n  color: #F2AA00;\n  background: linear-gradient(0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.6));\n  box-shadow: inset 0 0 1px #000000;\n  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26); }\n\n.one {\n  color: white;\n  background: linear-gradient(0deg, #7D2014, 50%, #AB2B1A); }\n\n.two {\n  color: white;\n  background: linear-gradient(0deg, #3E2407, 50%, #5D4631); }\n\n.civ {\n  color: #5C1A1A;\n  background: linear-gradient(0deg, #878787, 50%, #B8B8B8); }\n\n.assassin {\n  color: red;\n  background: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 1.3vw;\n  border-collapse: separate; }\n\ndiv.controls {\n  height: 15vh;\n  display: flex;\n  justify-content: space-around;\n  align-items: center; }\n  div.controls button {\n    background: #2B2B2B;\n    border-radius: 10px;\n    font-weight: bold;\n    font-family: arial;\n    color: white;\n    font-size: 5vw;\n    height: 75%;\n    width: 25%; }\n\ndiv.clue-wrapper {\n  height: 70vh; }\n\n.clue-div {\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.clue {\n  text-align: center;\n  font-size: 3.4vw;\n  font-family: arial;\n  border-width: 5px;\n  border-style: solid;\n  border-color: black;\n  width: 19%;\n  height: 19%; }\n\n.splash {\n  display: flex;\n  flex-direction: column; }\n  .splash img {\n    max-width: 100%;\n    max-height: 100%; }\n\n.splash-img-div {\n  display: flex;\n  align-items: center;\n  height: 50vh;\n  margin: auto; }\n\n.splash-btns {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  align-items: center;\n  height: 50vh; }\n  .splash-btns div img {\n    display: block;\n    margin: auto;\n    max-width: 100%;\n    max-height: 100%; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex; }\n\n.score {\n  border-radius: 10px;\n  font-weight: bold;\n  font-family: arial;\n  color: white;\n  font-size: 4vw;\n  margin: auto;\n  padding: 1.5vh 2.3vw;\n  position: relative; }\n\n.active {\n  box-shadow: inset 0 0 40px #FFFFFF; }\n\n.turn {\n  text-align: center;\n  width: 20%;\n  font-size: 4vw; }\n\n.turn-one:after, .turn-one:before {\n  right: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-one:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-right-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-one:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-right-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n\n.turn-two:after, .turn-one:before {\n  left: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-two:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-left-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-two:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-left-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n", ""]);
 	
 	// exports
 

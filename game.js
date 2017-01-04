@@ -15,6 +15,7 @@ game.prototype.initialize = function() {
   this.score = { one: 0, two: 0 };
   this.is_over = false;
   this.is_paused = true;
+  this.last_move_made_at = null;
   var game_time = 60 * 20;
   this.team_data = {
     one: { time: game_time/2, remaining_words: 8 + (this.turn == 'one' ? 1 : 0) },
@@ -68,18 +69,18 @@ game.prototype.get_board_state = function(with_clues) {
 }
 
 game.prototype.reveal = function(coords) {
-  if (this.guess_state[coords.y][coords.x] == 0) {
+  if (!this.is_paused && this.guess_state[coords.y][coords.x] == 0) {
     this.guess_state[coords.y][coords.x] = 1;
     if (this.card[coords.y][coords.x] != this.turn) {
-      this.turn = (this.turn == "one" ? "two" : "one");
+      this.pass_turn();
       if (this.card[coords.y][coords.x] == this.turn) {
-        this.team_data[this.turn == "one" ? "one" : "two"].remaining_words -= 1;
+        this.team_data[this.turn].remaining_words -= 1;
       }
       if (this.card[coords.y][coords.x] == "assassin") {
         this.is_over = true;
       }
     } else {
-      this.team_data[this.turn == "one" ? "one" : "two"].remaining_words -= 1;
+      this.team_data[this.turn].remaining_words -= 1;
 
     }
   }
@@ -89,8 +90,29 @@ game.prototype.reset = function() {
   this.initialize();
 }
 
+game.prototype.play_pause = function() {
+  if (this.is_paused) {
+    this.last_move_made_at = Date.now();
+  } else {
+    this.team_data[this.turn].time -= Math.floor((Date.now() - this.last_move_made_at)/1000);
+    if (this.team_data[this.turn].time < 0) {
+      this.team_data[this.turn].time = 0;
+    }
+    this.last_move_made_at = null;
+  }
+  this.is_paused = !this.is_paused;
+}
+
 game.prototype.pass_turn = function() {
-  this.turn = (this.turn == "one" ? "two" : "one")
+  if (!this.is_paused) {
+    var now = Date.now();
+    this.team_data[this.turn].time -= Math.floor((now - this.last_move_made_at)/1000);
+    if (this.team_data[this.turn].time < 0) {
+      this.team_data[this.turn].time = 0;
+    }
+    this.last_move_made_at = now;
+    this.turn = (this.turn == "one" ? "two" : "one")
+  }
 }
 
 game.prototype.game_state = function(with_clues) {

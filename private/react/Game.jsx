@@ -11,7 +11,9 @@ class Game extends React.Component {
       this.setState({
         gameState: data.board,
         teamOneRemainingWords: data.team_data.one.remaining_words,
+        teamOneRemainingTime: data.team_data.one.time,
         teamTwoRemainingWords: data.team_data.two.remaining_words,
+        teamTwoRemainingTime: data.team_data.two.time,
         isPaused: data.is_paused,
         isOver: data.is_over,
         turn: data.turn
@@ -21,12 +23,33 @@ class Game extends React.Component {
       this.setState({
         clues: data.board,
         teamOneRemainingWords: data.team_data.one.remaining_words,
+        teamOneRemainingTime: data.team_data.one.time,
         teamTwoRemainingWords: data.team_data.two.remaining_words,
+        teamTwoRemainingTime: data.team_data.two.time,
         isPaused: data.is_paused,
         isOver: data.is_over,
         turn: data.turn
       });
     });
+  }
+
+  componentDidMount () {
+    var intervalId = setInterval(this.timer.bind(this), 1000);
+    this.setState({intervalId: intervalId});
+  }
+
+  componentWillUnmount () {
+    clearInterval(this.state.intervalId);
+  }
+
+  timer () {
+    if (this.state.isPaused == false) {
+      if (this.state.turn == "one" && this.state.teamOneRemainingTime > 0) {
+        this.setState({ teamOneRemainingTime: this.state.teamOneRemainingTime - 1 });
+      } else if (this.state.turn == "two" && this.state.teamTwoRemainingTime > 0) {
+        this.setState({ teamTwoRemainingTime: this.state.teamTwoRemainingTime - 1 });
+      }
+    }
   }
 
   onBoardSelect () {
@@ -69,13 +92,26 @@ class Game extends React.Component {
     </td>);
   }
 
+  formatTime (seconds) {
+    var m = String(Math.floor(seconds/60));
+    var s = String(seconds % 60);
+    return m + ":" + (s.length > 1 ? "" : "0") + s;
+  }
+
   renderScoreBoard () {
     if (this.state.player == "board") {
       var team_name = <span className={ [this.state.turn, "score", "turn", (this.state.turn == "one" ? "turn-one" : "turn-two")].join(' ') }>
         { this.state.turn == "one" ? "Party" : "Workers" }
       </span>;
     }
+    var team_one_time = <span className={ "one score" + (this.state.turn == "one" ? " active" : "") }>
+      { this.formatTime(this.state.teamOneRemainingTime) }
+    </span>;
+    var team_two_time = <span className={ "two score" + (this.state.turn == "two" ? " active" : "") }>
+      { this.formatTime(this.state.teamTwoRemainingTime) }
+    </span>;
     return (<div className={ (this.state.player == "clue_giver" ? "controls" : "scoreboard") }>
+      { team_one_time }
       <span className={ "one score" + (this.state.turn == "one" ? " active" : "") }>
         { this.state.teamOneRemainingWords }
       </span>
@@ -83,6 +119,7 @@ class Game extends React.Component {
       <span className={ "two score" + (this.state.turn == "two" ? " active" : "") }>
         { this.state.teamTwoRemainingWords }
       </span>
+      { team_two_time }
     </div>);
   }
 
@@ -112,6 +149,10 @@ class Game extends React.Component {
     this.props.socket.emit('pass_turn');
   }
 
+  handlePlayPause() {
+    this.props.socket.emit('play_pause');
+  }
+
   renderClueGiver () {
     var clue_rows = this.state.clues.map((row, i) => {
       return (<tr>{ row.map((word, j) => {
@@ -125,7 +166,7 @@ class Game extends React.Component {
     });
     var controls = <div className="controls">
       <button onClick={ this.handleReset.bind(this) }>Reset</button>
-      <button>Play</button>
+      <button onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>
       <button onClick={ this.handlePass.bind(this) }>Pass</button>
     </div>;
     return (<div className="clue-giver">
