@@ -8,7 +8,10 @@ class App extends React.Component {
   render () {
     return (
       <div>
-        <Game socket={ socket }/>
+        <Game
+          socket={ socket }
+          roomId={ window.location.pathname.slice(1, window.location.pathname.length) } 
+        />
       </div>
     );
   }

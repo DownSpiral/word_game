@@ -86,7 +86,10 @@
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        _react2.default.createElement(_Game2.default, { socket: socket })
+	        _react2.default.createElement(_Game2.default, {
+	          socket: socket,
+	          roomId: window.location.pathname.slice(1, window.location.pathname.length)
+	        })
 	      );
 	    }
 	  }]);
@@ -22382,9 +22385,47 @@
 	
 	    var _this = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, props));
 	
-	    _this.state = { likesCount: 0 };
+	    if (_this.props.roomId) {
+	      _this.onJoinRoomSubmit(_this.props.roomId);
+	    }
+	    window.onpopstate = function (evt) {
+	      console.log(evt);
+	      if (window.location.pathname == "/" || evt.state && evt.state.roomId) {
+	        _this.setState({
+	          roomId: null,
+	          clues: null,
+	          gameState: null,
+	          teamOneRemainingWords: null,
+	          teamOneRemainingTime: null,
+	          teamTwoRemainingWords: null,
+	          teamTwoRemainingTime: null,
+	          isPaused: null,
+	          isOver: null,
+	          turn: null,
+	          player: null
+	        });
+	        if (evt.state && evt.state.roomId) {
+	          _this.onJoinRoomSubmit(evt.state.roomId);
+	        }
+	      }
+	    };
+	    _this.state = {};
 	    _this.onBoardSelect = _this.onBoardSelect.bind(_this);
 	    _this.onClueGiverSelect = _this.onClueGiverSelect.bind(_this);
+	    _this.onJoinRoomSubmit = _this.onJoinRoomSubmit.bind(_this);
+	    _this.onJoinRoomSelect = _this.onJoinRoomSelect.bind(_this);
+	    _this.onCreateRoom = _this.onCreateRoom.bind(_this);
+	    _this.props.socket.on('room_success', function (roomId) {
+	      console.log("room_success");
+	      _this.setState({ selectingRole: true, loadingRoom: null, roomId: roomId });
+	      if (window.location.pathname != "/" + roomId) {
+	        window.history.pushState({ roomId: roomId }, "Role select", window.location.origin + '/' + roomId);
+	      }
+	    });
+	    _this.props.socket.on('room_failed', function (failedRoomId) {
+	      console.log("room_failed");
+	      _this.setState({ roomFailure: true, loadingRoom: null, failedRoomId: failedRoomId, roomIdInputVal: "" });
+	    });
 	    _this.props.socket.on('game_state', function (data) {
 	      _this.setState({
 	        gameState: data.board,
@@ -22448,29 +22489,145 @@
 	      console.log('harg');
 	    }
 	  }, {
-	    key: 'renderPlayerSelection',
-	    value: function renderPlayerSelection() {
+	    key: 'onJoinRoomSelect',
+	    value: function onJoinRoomSelect() {
+	      this.setState({ joiningRoom: true });
+	    }
+	  }, {
+	    key: 'onCreateRoom',
+	    value: function onCreateRoom() {
+	      this.props.socket.emit('create');
+	      this.setState({ loadingRoom: true });
+	    }
+	  }, {
+	    key: 'renderSplash',
+	    value: function renderSplash() {
+	      var nav;
+	      var display = _react2.default.createElement('img', { src: 'public/images/logo.png' });
+	      if (this.state.loadingRoom) {
+	        nav = _react2.default.createElement(
+	          'div',
+	          { className: 'splash-btns' },
+	          _react2.default.createElement(
+	            'div',
+	            null,
+	            'Loading'
+	          )
+	        );
+	      } else if (this.state.roomId) {
+	        display = _react2.default.createElement(
+	          'div',
+	          { className: 'splash-btns room-id-container' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'room-id' },
+	            this.state.roomId.toUpperCase()
+	          )
+	        );
+	        nav = this.renderPlayerSelection();
+	      } else if (this.state.joiningRoom) {
+	        nav = this.renderJoinRoom();
+	      } else {
+	        nav = this.renderRoomSelection();
+	      }
 	      return _react2.default.createElement(
 	        'div',
 	        { className: 'splash' },
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'splash-img-div' },
-	          _react2.default.createElement('img', { src: 'public/images/logo.png' })
+	          display
+	        ),
+	        nav
+	      );
+	    }
+	  }, {
+	    key: 'onJoinRoomSubmit',
+	    value: function onJoinRoomSubmit(roomId) {
+	      this.props.socket.emit('join', roomId);
+	      this.setState({ loadingRoom: true });
+	    }
+	  }, {
+	    key: 'handleRoomIdInput',
+	    value: function handleRoomIdInput(i, evt) {
+	      var inputVal = evt.target.value;
+	      var curInputVal = this.state.roomIdInputVal || "";
+	      var nextInputVal = curInputVal + inputVal.toUpperCase();
+	      this.setState({ roomIdInputVal: nextInputVal });
+	      if (nextInputVal.length > 3) {
+	        this.onJoinRoomSubmit(nextInputVal);
+	      } else {
+	        this.refs["room-id-input-" + (i + 1)].focus();
+	      }
+	    }
+	  }, {
+	    key: 'renderJoinRoom',
+	    value: function renderJoinRoom() {
+	      var _this2 = this;
+	
+	      var curInputVal = this.state.roomIdInputVal || "";
+	      var roomIdInputs = Array(4).fill().map(function (_, i) {
+	        return _react2.default.createElement('input', {
+	          className: 'room-id-input',
+	          value: curInputVal.toUpperCase()[i],
+	          key: i,
+	          size: 1,
+	          maxLength: 1,
+	          type: 'text',
+	          onChange: _this2.handleRoomIdInput.bind(_this2, i),
+	          autoComplete: 'off',
+	          autoFocus: curInputVal.length == i,
+	          ref: "room-id-input-" + i
+	        });
+	      });
+	      var failureMessage;
+	      if (this.state.failedRoomId) {
+	        failureMessage = _react2.default.createElement(
+	          'div',
+	          { className: 'fail-message' },
+	          "Invalid Room: " + this.state.failedRoomId
+	        );
+	      }
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'splash-btns room-id-selection' },
+	        failureMessage,
+	        roomIdInputs
+	      );
+	    }
+	  }, {
+	    key: 'renderRoomSelection',
+	    value: function renderRoomSelection() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'splash-btns' },
+	        _react2.default.createElement(
+	          'div',
+	          { onClick: this.onCreateRoom },
+	          'Create Room'
 	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'splash-btns' },
-	          _react2.default.createElement(
-	            'div',
-	            { onClick: this.onClueGiverSelect },
-	            _react2.default.createElement('img', { src: 'public/images/icons/Display-Spymaster.png' })
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { onClick: this.onBoardSelect },
-	            _react2.default.createElement('img', { src: 'public/images/icons/Display-Team.png' })
-	          )
+	          { onClick: this.onJoinRoomSelect },
+	          'Join Room'
+	        )
+	      );
+	    }
+	  }, {
+	    key: 'renderPlayerSelection',
+	    value: function renderPlayerSelection() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'splash-btns' },
+	        _react2.default.createElement(
+	          'div',
+	          { onClick: this.onClueGiverSelect },
+	          _react2.default.createElement('img', { src: 'public/images/icons/Display-Spymaster.png' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { onClick: this.onBoardSelect },
+	          _react2.default.createElement('img', { src: 'public/images/icons/Display-Team.png' })
 	        )
 	      );
 	    }
@@ -22540,13 +22697,13 @@
 	  }, {
 	    key: 'renderGameBoard',
 	    value: function renderGameBoard() {
-	      var _this2 = this;
+	      var _this3 = this;
 	
 	      var board = this.state.gameState.map(function (row) {
 	        return _react2.default.createElement(
 	          'tr',
 	          null,
-	          row.map(_this2.formatWord)
+	          row.map(_this3.formatWord)
 	        );
 	      });
 	      return _react2.default.createElement(
@@ -22591,7 +22748,7 @@
 	  }, {
 	    key: 'renderClueGiver',
 	    value: function renderClueGiver() {
-	      var _this3 = this;
+	      var _this4 = this;
 	
 	      var clue_rows = this.state.clues.map(function (row, i) {
 	        return _react2.default.createElement(
@@ -22602,11 +22759,11 @@
 	            return _react2.default.createElement(
 	              'td',
 	              {
-	                onClick: _this3.handleClueClick.bind(_this3, i, j),
+	                onClick: _this4.handleClueClick.bind(_this4, i, j),
 	                key: word.word,
 	                className: "clue " + word.color
 	              },
-	              _this3.state.gameState[i][j].color ? "" : text
+	              _this4.state.gameState[i][j].color ? "" : text
 	            );
 	          })
 	        );
@@ -22659,7 +22816,7 @@
 	      } else if (this.state.player == "clue_giver" && this.state.clues) {
 	        game = this.renderClueGiver();
 	      } else {
-	        game = this.renderPlayerSelection();
+	        game = this.renderSplash();
 	      }
 	      return game;
 	    }
@@ -22711,7 +22868,7 @@
 	
 	
 	// module
-	exports.push([module.id, ".card {\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 10px;\n  padding: 2.1% 0px;\n  font-size: 2.4vw;\n  font-weight: bold;\n  font-family: arial;\n  color: #F2AA00;\n  background: linear-gradient(0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.6));\n  box-shadow: inset 0 0 1px #000000;\n  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26); }\n\n.one {\n  color: white;\n  background: linear-gradient(0deg, #7D2014, 50%, #AB2B1A); }\n\n.two {\n  color: white;\n  background: linear-gradient(0deg, #3E2407, 50%, #5D4631); }\n\n.civ {\n  color: #5C1A1A;\n  background: linear-gradient(0deg, #878787, 50%, #B8B8B8); }\n\n.assassin {\n  color: red;\n  background: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 1.3vw;\n  border-collapse: separate; }\n\ndiv.controls {\n  height: 15vh;\n  display: flex;\n  justify-content: space-around;\n  align-items: center; }\n  div.controls button {\n    background: #2B2B2B;\n    border-radius: 10px;\n    font-weight: bold;\n    font-family: arial;\n    color: white;\n    font-size: 5vw;\n    height: 75%;\n    width: 25%; }\n\ndiv.clue-wrapper {\n  height: 70vh; }\n\n.clue-div {\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.clue {\n  text-align: center;\n  font-size: 3.4vw;\n  font-family: arial;\n  border-width: 5px;\n  border-style: solid;\n  border-color: black;\n  width: 19%;\n  height: 19%; }\n\n.splash {\n  display: flex;\n  flex-direction: column; }\n  .splash img {\n    max-width: 100%;\n    max-height: 100%; }\n\n.splash-img-div {\n  display: flex;\n  align-items: center;\n  height: 50vh;\n  margin: auto; }\n\n.splash-btns {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  align-items: center;\n  height: 50vh; }\n  .splash-btns div img {\n    display: block;\n    margin: auto;\n    max-width: 100%;\n    max-height: 100%; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex; }\n\n.score {\n  border-radius: 10px;\n  font-weight: bold;\n  font-family: arial;\n  color: white;\n  font-size: 4vw;\n  margin: auto;\n  padding: 1.5vh 2.3vw;\n  position: relative; }\n\n.active {\n  box-shadow: inset 0 0 40px #FFFFFF; }\n\n.turn {\n  text-align: center;\n  width: 20%;\n  font-size: 4vw; }\n\n.turn-one:after, .turn-one:before {\n  right: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-one:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-right-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-one:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-right-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n\n.turn-two:after, .turn-one:before {\n  left: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-two:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-left-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-two:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-left-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n", ""]);
+	exports.push([module.id, ".card {\n  height: 20%;\n  text-align: center;\n  width: 15%;\n  border-radius: 10px;\n  padding: 2.1% 0px;\n  font-size: 2.4vw;\n  font-weight: bold;\n  font-family: arial;\n  color: #F2AA00;\n  background: linear-gradient(0deg, rgba(48, 48, 48, 0.25), 50%, rgba(49, 49, 49, 0.6));\n  box-shadow: inset 0 0 1px #000000;\n  text-shadow: 0 0 1em rgba(255, 131, 0, 0.26); }\n\n.one {\n  color: white;\n  background: linear-gradient(0deg, #7D2014, 50%, #AB2B1A); }\n\n.two {\n  color: white;\n  background: linear-gradient(0deg, #3E2407, 50%, #5D4631); }\n\n.civ {\n  color: #5C1A1A;\n  background: linear-gradient(0deg, #878787, 50%, #B8B8B8); }\n\n.assassin {\n  color: red;\n  background: black; }\n\n.turn {\n  background-color: darkslategray; }\n\n.game-table {\n  width: 100%;\n  border-spacing: 1.3vw;\n  border-collapse: separate; }\n\ndiv.controls {\n  height: 15vh;\n  display: flex;\n  justify-content: space-around;\n  align-items: center; }\n  div.controls button {\n    background: #2B2B2B;\n    border-radius: 10px;\n    font-weight: bold;\n    font-family: arial;\n    color: white;\n    font-size: 5vw;\n    height: 75%;\n    width: 25%; }\n\ndiv.clue-wrapper {\n  height: 70vh; }\n\n.clue-div {\n  margin: auto;\n  width: 96vm;\n  height: 96vm;\n  width: 96vmin;\n  height: 96vmin; }\n\n.clue-table {\n  width: 100%;\n  height: 100%;\n  border-collapse: collapse; }\n\n.clue {\n  text-align: center;\n  font-size: 3.4vw;\n  font-family: arial;\n  border-width: 5px;\n  border-style: solid;\n  border-color: black;\n  width: 19%;\n  height: 19%; }\n\n.splash {\n  display: flex;\n  flex-direction: column; }\n  .splash img {\n    max-width: 100%;\n    max-height: 100%; }\n\n.splash-img-div {\n  display: flex;\n  align-items: center;\n  height: 50vh;\n  margin: auto; }\n\n.splash-btns {\n  display: flex;\n  flex-flow: row wrap;\n  justify-content: space-around;\n  align-items: center;\n  height: 50vh; }\n  .splash-btns div {\n    font-size: 3em;\n    color: #F2AB00; }\n    .splash-btns div img {\n      display: block;\n      margin: auto;\n      max-width: 100%;\n      max-height: 100%; }\n\n.room-id-selection {\n  padding: 0 15vw;\n  flex-flow: row; }\n  .room-id-selection div.fail-message {\n    position: absolute;\n    top: 55vh;\n    color: red;\n    font-size: 4vh; }\n  .room-id-selection input.room-id-input {\n    padding: 0;\n    font-weight: bold;\n    font-family: arial;\n    font-size: 13vw;\n    width: 15vw;\n    text-align: center;\n    color: #F2AB00;\n    outline: none;\n    border-radius: 15px;\n    background: rgba(162, 162, 162, 0.22); }\n\ndiv.room-id-container {\n  flex-direction: column; }\n  div.room-id-container div.room-id {\n    font-weight: bold;\n    font-family: arial;\n    font-size: 13vw;\n    letter-spacing: 6vw;\n    margin-left: 6vw; }\n\n.game-div {\n  height: 74vh; }\n\n.center {\n  height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center; }\n\n.hidden {\n  opacity: 0.2; }\n\n.scoreboard {\n  height: 25vh;\n  display: flex; }\n\n.score {\n  border-radius: 10px;\n  font-weight: bold;\n  font-family: arial;\n  color: white;\n  font-size: 4vw;\n  margin: auto;\n  padding: 1.5vh 2.3vw;\n  position: relative; }\n\n.active {\n  box-shadow: inset 0 0 40px #FFFFFF; }\n\n.turn {\n  text-align: center;\n  width: 20%;\n  font-size: 4vw; }\n\n.turn-one:after, .turn-one:before {\n  right: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-one:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-right-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-one:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-right-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n\n.turn-two:after, .turn-one:before {\n  left: 100%;\n  top: 50%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none; }\n\n.turn-two:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-left-color: #88b7d5;\n  border-width: 30px;\n  margin-top: -30px; }\n\n.turn-two:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-left-color: #c2e1f5;\n  border-width: 36px;\n  margin-top: -36px; }\n", ""]);
 	
 	// exports
 

@@ -4,9 +4,47 @@ class Game extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { likesCount : 0 };
+    if (this.props.roomId) {
+      this.onJoinRoomSubmit(this.props.roomId);
+    }
+    window.onpopstate = (evt) => {
+      console.log(evt);
+      if (window.location.pathname == "/" || (evt.state && evt.state.roomId)) {
+        this.setState({
+          roomId: null,
+          clues: null,
+          gameState: null,
+          teamOneRemainingWords: null,
+          teamOneRemainingTime: null,
+          teamTwoRemainingWords: null,
+          teamTwoRemainingTime: null,
+          isPaused: null,
+          isOver: null,
+          turn: null,
+          player: null
+        });
+        if (evt.state && evt.state.roomId) {
+          this.onJoinRoomSubmit(evt.state.roomId);
+        }
+      }
+    }
+    this.state = {};
     this.onBoardSelect = this.onBoardSelect.bind(this);
     this.onClueGiverSelect = this.onClueGiverSelect.bind(this);
+    this.onJoinRoomSubmit = this.onJoinRoomSubmit.bind(this);
+    this.onJoinRoomSelect = this.onJoinRoomSelect.bind(this);
+    this.onCreateRoom = this.onCreateRoom.bind(this);
+    this.props.socket.on('room_success', (roomId) => {
+      console.log("room_success");
+      this.setState({ selectingRole: true, loadingRoom: null, roomId: roomId });
+      if (window.location.pathname != "/" + roomId) {
+        window.history.pushState({ roomId: roomId }, "Role select", window.location.origin + '/' + roomId);
+      }
+    });
+    this.props.socket.on('room_failed', (failedRoomId) => {
+      console.log("room_failed");
+      this.setState({ roomFailure: true, loadingRoom: null, failedRoomId: failedRoomId, roomIdInputVal: "" });
+    });
     this.props.socket.on('game_state', (data) => {
       this.setState({
         gameState: data.board,
@@ -63,19 +101,106 @@ class Game extends React.Component {
     console.log('harg');
   }
 
-  renderPlayerSelection () {
+  onJoinRoomSelect () {
+    this.setState({ joiningRoom: true });
+  }
+
+  onCreateRoom () {
+    this.props.socket.emit('create');
+    this.setState({ loadingRoom: true });
+  }
+
+  renderSplash () {
+    var nav;
+    var display = <img src="public/images/logo.png" />;
+    if (this.state.loadingRoom) {
+      nav = <div className="splash-btns"><div>Loading</div></div>;
+    } else if (this.state.roomId) {
+      display = (<div className="splash-btns room-id-container">
+        <div className="room-id">{ this.state.roomId.toUpperCase() }</div>
+      </div>);
+      nav = this.renderPlayerSelection();
+    } else if (this.state.joiningRoom) {
+      nav = this.renderJoinRoom();
+    } else {
+      nav = this.renderRoomSelection();
+    }
     return (
       <div className="splash">
         <div className="splash-img-div">
-          <img src="public/images/logo.png" />
+          { display }
         </div>
-        <div className="splash-btns">
-          <div onClick={ this.onClueGiverSelect }>
-            <img src="public/images/icons/Display-Spymaster.png" />
-          </div>
-          <div onClick={ this.onBoardSelect }>
-            <img src="public/images/icons/Display-Team.png" />
-          </div>
+        { nav }
+      </div>
+    );
+  }
+
+  onJoinRoomSubmit (roomId) {
+    this.props.socket.emit('join', roomId);
+    this.setState({ loadingRoom: true });
+  }
+
+  handleRoomIdInput (i, evt) {
+    var inputVal = evt.target.value;
+    var curInputVal = this.state.roomIdInputVal || "";
+    var nextInputVal = curInputVal + inputVal.toUpperCase();
+    this.setState({ roomIdInputVal: nextInputVal });
+    if (nextInputVal.length > 3) {
+      this.onJoinRoomSubmit(nextInputVal);
+    } else {
+      this.refs["room-id-input-" + (i + 1)].focus();
+    }
+  }
+
+  renderJoinRoom () {
+    var curInputVal = this.state.roomIdInputVal || "";
+    var roomIdInputs = Array(4).fill().map((_, i) => {
+      return (<input
+        className="room-id-input"
+        value={ curInputVal.toUpperCase()[i] }
+        key={ i }
+        size={ 1 }
+        maxLength={ 1 }
+        type="text"
+        onChange={ this.handleRoomIdInput.bind(this, i) }
+        autoComplete="off"
+        autoFocus={ curInputVal.length == i }
+        ref={ "room-id-input-" + i }
+      />);
+    });
+    var failureMessage;
+    if (this.state.failedRoomId) {
+      failureMessage = (<div className="fail-message">{ "Invalid Room: " + this.state.failedRoomId }</div>);
+    }
+    return (
+      <div className="splash-btns room-id-selection">
+        { failureMessage }
+        { roomIdInputs }
+      </div>
+    );
+  }
+
+  renderRoomSelection () {
+    return (
+      <div className="splash-btns">
+        <div onClick={ this.onCreateRoom }>
+          Create Room
+        </div>
+        <div onClick={ this.onJoinRoomSelect }>
+          Join Room
+        </div>
+      </div>
+    );
+  }
+
+  renderPlayerSelection () {
+    return (
+      <div className="splash-btns">
+        <div onClick={ this.onClueGiverSelect }>
+          <img src="public/images/icons/Display-Spymaster.png" />
+        </div>
+        <div onClick={ this.onBoardSelect }>
+          <img src="public/images/icons/Display-Team.png" />
         </div>
       </div>
     );
@@ -187,7 +312,7 @@ class Game extends React.Component {
     } else if (this.state.player == "clue_giver" && this.state.clues) {
       game = this.renderClueGiver();
     } else {
-      game = this.renderPlayerSelection();
+      game = this.renderSplash();
     }
     return game;
   }
