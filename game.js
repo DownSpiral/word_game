@@ -117,9 +117,18 @@ game.prototype.pass_turn = function() {
 }
 
 game.prototype.game_state = function(with_clues) {
+  //Make a fake move so that players that join mid game have an accurate clock
+  var team_data_copy = {
+    one: _.extend({}, this.team_data.one),
+    two: _.extend({}, this.team_data.two)
+  };
+  if (this.last_move_made_at) {
+    team_data_copy[this.turn].time -= Math.floor((Date.now() - this.last_move_made_at)/1000);
+  }
+
   return {
     board: this.get_board_state(with_clues),
-    team_data: this.team_data,
+    team_data: team_data_copy,
     is_over: this.is_over,
     is_paused: this.is_paused,
     turn: this.turn
