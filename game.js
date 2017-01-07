@@ -81,7 +81,7 @@ game.prototype.reveal = function(coords) {
       }
     } else {
       this.team_data[this.turn].remaining_words -= 1;
-
+      this.decrement_time();
     }
   }
 }
@@ -94,23 +94,24 @@ game.prototype.play_pause = function() {
   if (this.is_paused) {
     this.last_move_made_at = Date.now();
   } else {
-    this.team_data[this.turn].time -= Math.floor((Date.now() - this.last_move_made_at)/1000);
-    if (this.team_data[this.turn].time < 0) {
-      this.team_data[this.turn].time = 0;
-    }
+    this.decrement_time();
     this.last_move_made_at = null;
   }
   this.is_paused = !this.is_paused;
 }
 
+game.prototype.decrement_time = function() {
+  var now = Date.now();
+  this.team_data[this.turn].time -= Math.floor((now - this.last_move_made_at)/1000);
+  if (this.team_data[this.turn].time < 0) {
+    this.team_data[this.turn].time = 0;
+  }
+  this.last_move_made_at = now;
+}
+
 game.prototype.pass_turn = function() {
   if (!this.is_paused) {
-    var now = Date.now();
-    this.team_data[this.turn].time -= Math.floor((now - this.last_move_made_at)/1000);
-    if (this.team_data[this.turn].time < 0) {
-      this.team_data[this.turn].time = 0;
-    }
-    this.last_move_made_at = now;
+    this.decrement_time();
     this.turn = (this.turn == "one" ? "two" : "one")
   }
 }
