@@ -145,6 +145,7 @@ class Game extends React.Component {
     this.setState({ roomIdInputVal: nextInputVal });
     if (nextInputVal.length > 3) {
       this.onJoinRoomSubmit(nextInputVal);
+      this.refs.roomIdInput.blur();
     }
   }
 
@@ -164,6 +165,7 @@ class Game extends React.Component {
           type="text"
           onChange={ this.handleRoomIdInput.bind(this) }
           autoComplete="off"
+          ref="roomIdInput"
           autoFocus
         />
       </div>
@@ -202,7 +204,7 @@ class Game extends React.Component {
       text = "X";
     }
     var should_hide = word.color && (word.color != "civ" && word.color != "assassin");
-    return (<td key={ word.word } className={ "card " + (word.color || "") }>
+    return (<td key={ word.word } className={ "no-select card " + (word.color || "") }>
       <span className={ should_hide ? "hidden" : "" }>{ text }</span>
     </td>);
   }
