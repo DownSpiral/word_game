@@ -140,34 +140,15 @@ class Game extends React.Component {
     this.setState({ loadingRoom: true });
   }
 
-  handleRoomIdInput (i, evt) {
-    var inputVal = evt.target.value;
-    var curInputVal = this.state.roomIdInputVal || "";
-    var nextInputVal = curInputVal + inputVal.toUpperCase();
+  handleRoomIdInput (evt) {
+    var nextInputVal = evt.target.value.toUpperCase();
     this.setState({ roomIdInputVal: nextInputVal });
     if (nextInputVal.length > 3) {
       this.onJoinRoomSubmit(nextInputVal);
-    } else {
-      this.refs["room-id-input-" + (i + 1)].focus();
     }
   }
 
   renderJoinRoom () {
-    var curInputVal = this.state.roomIdInputVal || "";
-    var roomIdInputs = Array(4).fill().map((_, i) => {
-      return (<input
-        className="room-id-input"
-        value={ curInputVal.toUpperCase()[i] }
-        key={ i }
-        size={ 1 }
-        maxLength={ 1 }
-        type="text"
-        onChange={ this.handleRoomIdInput.bind(this, i) }
-        autoComplete="off"
-        autoFocus={ curInputVal.length == i }
-        ref={ "room-id-input-" + i }
-      />);
-    });
     var failureMessage;
     if (this.state.failedRoomId) {
       failureMessage = (<div className="fail-message">{ "Invalid Room: " + this.state.failedRoomId }</div>);
@@ -175,7 +156,16 @@ class Game extends React.Component {
     return (
       <div className="splash-btns room-id-selection">
         { failureMessage }
-        { roomIdInputs }
+        <input
+          className="room-id-input"
+          value={ this.state.roomIdInputVal }
+          size={ 4 }
+          maxLength={ 4 }
+          type="text"
+          onChange={ this.handleRoomIdInput.bind(this) }
+          autoComplete="off"
+          autoFocus
+        />
       </div>
     );
   }
