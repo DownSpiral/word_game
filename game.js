@@ -9,7 +9,12 @@ game.prototype.initialize = function() {
   this.guessing_players = {};
   this.spy_master_players = {};
   this.words = this.generate_words();
-  this.turn = _.sample(['one', 'two']);
+  if (this.first_turn) {
+    this.first_turn = (this.first_turn == "one" ? "two" : "one")
+  } else {
+    this.first_turn = _.sample(['one', 'two']);
+  }
+  this.turn = this.first_turn + "";
   this.card = this.generate_card(this.turn);
   this.guess_state = this.generate_initial_guess_state();
   this.score = { one: 0, two: 0 };
