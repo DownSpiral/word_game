@@ -22389,7 +22389,6 @@
 	      _this.onJoinRoomSubmit(_this.props.roomId);
 	    }
 	    window.onpopstate = function (evt) {
-	      console.log(evt);
 	      if (window.location.pathname == "/" || evt.state && evt.state.roomId) {
 	        _this.setState({
 	          roomId: null,
@@ -22417,14 +22416,25 @@
 	    _this.onCreateRoom = _this.onCreateRoom.bind(_this);
 	    _this.props.socket.on('room_success', function (roomId) {
 	      console.log("room_success");
-	      _this.setState({ selectingRole: true, loadingRoom: null, roomId: roomId });
+	      _this.setState({
+	        selectingRole: true,
+	        loadingRoom: null,
+	        roomId: roomId,
+	        roomIdInputVal: null,
+	        joiningRoom: null
+	      });
 	      if (window.location.pathname != "/" + roomId) {
 	        window.history.pushState({ roomId: roomId }, "Role select", window.location.origin + '/' + roomId);
 	      }
 	    });
 	    _this.props.socket.on('room_failed', function (failedRoomId) {
 	      console.log("room_failed");
-	      _this.setState({ roomFailure: true, loadingRoom: null, failedRoomId: failedRoomId, roomIdInputVal: "" });
+	      _this.setState({
+	        roomFailure: true,
+	        loadingRoom: null,
+	        failedRoomId: failedRoomId,
+	        roomIdInputVal: null
+	      });
 	    });
 	    _this.props.socket.on('game_state', function (data) {
 	      _this.setState({

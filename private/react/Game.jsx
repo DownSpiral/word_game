@@ -8,7 +8,6 @@ class Game extends React.Component {
       this.onJoinRoomSubmit(this.props.roomId);
     }
     window.onpopstate = (evt) => {
-      console.log(evt);
       if (window.location.pathname == "/" || (evt.state && evt.state.roomId)) {
         this.setState({
           roomId: null,
@@ -36,14 +35,29 @@ class Game extends React.Component {
     this.onCreateRoom = this.onCreateRoom.bind(this);
     this.props.socket.on('room_success', (roomId) => {
       console.log("room_success");
-      this.setState({ selectingRole: true, loadingRoom: null, roomId: roomId });
+      this.setState({
+        selectingRole: true,
+        loadingRoom: null,
+        roomId: roomId,
+        roomIdInputVal: null,
+        joiningRoom: null
+      });
       if (window.location.pathname != "/" + roomId) {
-        window.history.pushState({ roomId: roomId }, "Role select", window.location.origin + '/' + roomId);
+        window.history.pushState(
+          { roomId: roomId },
+          "Role select",
+          window.location.origin + '/' + roomId
+        );
       }
     });
     this.props.socket.on('room_failed', (failedRoomId) => {
       console.log("room_failed");
-      this.setState({ roomFailure: true, loadingRoom: null, failedRoomId: failedRoomId, roomIdInputVal: "" });
+      this.setState({
+        roomFailure: true,
+        loadingRoom: null,
+        failedRoomId: failedRoomId,
+        roomIdInputVal: null
+      });
     });
     this.props.socket.on('game_state', (data) => {
       this.setState({
