@@ -25,6 +25,7 @@ io.on('connection', function(socket) {
   });
 
   socket.on('join', function(room_id) {
+    room_id = room_id.toUpperCase();
     var room = game_rooms[room_id];
     if (room) {
       room.join(socket);
