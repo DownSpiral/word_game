@@ -3,6 +3,7 @@ var nouns = require('./nouns_short.js');
 
 function game() {
   this.initialize();
+  this.wins = { one: 0, two: 0 };
 }
 
 game.prototype.initialize = function() {
@@ -82,19 +83,25 @@ game.prototype.reveal = function(coords) {
         this.team_data[this.turn].remaining_words -= 1;
       }
       if (this.card[coords.y][coords.x] == "assassin") {
-        this.is_over = true;
+        this.handle_game_end();
       }
     } else {
       this.team_data[this.turn].remaining_words -= 1;
       this.decrement_time();
     }
     if (this.team_data[this.turn].remaining_words == 0) {
-      this.is_over = true;
+      this.handle_game_end();
     }
   }
 }
 
+game.prototype.handle_game_end = function() {
+  this.is_over = true;
+  this.wins[this.turn] += 1;
+}
+
 game.prototype.reset = function() {
+  this.decrement_time();
   this.initialize();
 }
 
@@ -114,7 +121,7 @@ game.prototype.decrement_time = function() {
   if (this.team_data[this.turn].time < 0) {
     this.team_data[this.turn].time = 0;
     this.toggle_turn();
-    this.is_over = true;
+    this.handle_game_end();
   }
   this.last_move_made_at = now;
 }
@@ -133,14 +140,15 @@ game.prototype.pass_turn = function() {
 game.prototype.game_state = function(with_clues) {
   //Make a fake move so that players that join mid game have an accurate clock
   var team_data_copy = {
-    one: _.extend({}, this.team_data.one),
-    two: _.extend({}, this.team_data.two)
+    one: _.extend({ wins: this.wins.one }, this.team_data.one),
+    two: _.extend({ wins: this.wins.two }, this.team_data.two)
   };
   if (this.last_move_made_at && !this.is_over) {
     team_data_copy[this.turn].time -= Math.floor((Date.now() - this.last_move_made_at)/1000);
     if (team_data_copy[this.turn].time < 0) {
       team_data_copy[this.turn].time = 0;
       this.decrement_time();
+      team_data_copy[this.turn].wins += 1;
     }
   }
 

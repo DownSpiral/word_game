@@ -22441,8 +22441,10 @@
 	        gameState: data.board,
 	        teamOneRemainingWords: data.team_data.one.remaining_words,
 	        teamOneRemainingTime: data.team_data.one.time,
+	        teamOneWins: data.team_data.one.wins,
 	        teamTwoRemainingWords: data.team_data.two.remaining_words,
 	        teamTwoRemainingTime: data.team_data.two.time,
+	        teamTwoWins: data.team_data.two.wins,
 	        isPaused: data.is_paused,
 	        isOver: data.is_over,
 	        turn: data.turn
@@ -22453,8 +22455,10 @@
 	        clues: data.board,
 	        teamOneRemainingWords: data.team_data.one.remaining_words,
 	        teamOneRemainingTime: data.team_data.one.time,
+	        teamOneWins: data.team_data.one.wins,
 	        teamTwoRemainingWords: data.team_data.two.remaining_words,
 	        teamTwoRemainingTime: data.team_data.two.time,
+	        teamTwoWins: data.team_data.two.wins,
 	        isPaused: data.is_paused,
 	        isOver: data.is_over,
 	        turn: data.turn
@@ -22483,6 +22487,7 @@
 	          if (newState.teamOneRemainingTime <= 0) {
 	            newState.isOver = true;
 	            newState.turn = "two";
+	            newState.teamTwoWins = this.state.teamTwoWins + 1;
 	          }
 	          this.setState(newState);
 	        } else if (this.state.turn == "two" && this.state.teamTwoRemainingTime > 0) {
@@ -22490,6 +22495,7 @@
 	          if (newState.teamTwoRemainingTime <= 0) {
 	            newState.isOver = true;
 	            newState.turn = "one";
+	            newState.teamOneWins = this.state.teamOneWins + 1;
 	          }
 	          this.setState(newState);
 	        }
@@ -22674,8 +22680,18 @@
 	        { className: this.state.player == "clue_giver" ? "controls" : "scoreboard" },
 	        _react2.default.createElement(
 	          'span',
+	          { className: "score one" },
+	          this.state.teamOneWins
+	        ),
+	        _react2.default.createElement(
+	          'span',
 	          { className: "score " + this.state.turn },
 	          (this.state.turn == "one" ? "Communists" : "Capitalists") + " Win!"
+	        ),
+	        _react2.default.createElement(
+	          'span',
+	          { className: "score two" },
+	          this.state.teamTwoWins
 	        )
 	      );
 	    }
