@@ -96,8 +96,10 @@ game.prototype.reveal = function(coords) {
 }
 
 game.prototype.handle_game_end = function() {
-  this.is_over = true;
-  this.wins[this.turn] += 1;
+  if (!this.is_over) {
+    this.is_over = true;
+    this.wins[this.turn] += 1;
+  }
 }
 
 game.prototype.reset = function() {
