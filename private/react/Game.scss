@@ -49,6 +49,10 @@ div.controls {
     width: 16vw;
     text-align: center;
   }
+  .play {
+    background: linear-gradient(0deg, #4C3600, 50%, #F2AB00);
+    color: black;
+  }
   button {
     background: #2B2B2B;
     border-radius: 10px;
@@ -126,27 +130,26 @@ div.clue-wrapper {
   }
 }
 .room-id-selection {
-    flex-flow: row;
-    div.fail-message {
-      position: absolute;
-      top: 55vh;
-      color: red;
-      font-size: 4vh;
-    }
-    input.room-id-input {
-      -webkit-user-select: text; /* Chrome/Safari/Opera */
-      padding: 0;
-      font-weight: bold;
-      font-family: arial;
-      font-size: 13vw;
-      width: 50vw;
-      text-align: center;
-      color: #F2AB00;
-      outline: none;
-      border-radius: 15px;
-      background: rgba(162, 162, 162, 0.22);
-    }
+  flex-flow: row;
+  div.fail-message {
+    position: absolute;
+    top: 55vh;
+    color: red;
+    font-size: 4vh;
   }
+  input.room-id-input {
+    -webkit-user-select: text; /* Chrome/Safari/Opera */
+    padding: 0;
+    font-weight: bold;
+    font-family: arial;
+    font-size: 13vw;
+    width: 50vw;
+    text-align: center;
+    color: #F2AB00;
+    border-radius: 15px;
+    background: rgba(162, 162, 162, 0.22);
+  }
+}
 div.room-id-container {
   margin: auto;
   div.room-id {
@@ -246,4 +249,7 @@ span, div {
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Non-prefixed version, currently
                         not supported by any browser */
+}
+*:focus {
+  outline: none;
 }

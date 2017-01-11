@@ -334,7 +334,7 @@ class Game extends React.Component {
     var controlButtons = [<button onClick={ this.handleReset.bind(this) }>Reset</button>];
     if (!this.state.isOver) {
       controlButtons = controlButtons.concat([
-        <button onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>,
+        <button className={ this.state.isPaused ? "play" : "" } onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>,
         <button onClick={ this.handlePass.bind(this) }>Pass</button>
       ]);
     }
