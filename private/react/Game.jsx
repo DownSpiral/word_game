@@ -95,11 +95,21 @@ class Game extends React.Component {
   }
 
   timer () {
-    if (this.state.isPaused == false) {
+    if (this.state.isPaused == false && this.state.isOver == false) {
       if (this.state.turn == "one" && this.state.teamOneRemainingTime > 0) {
-        this.setState({ teamOneRemainingTime: this.state.teamOneRemainingTime - 1 });
+        var newState = { teamOneRemainingTime: this.state.teamOneRemainingTime - 1 };
+        if (newState.teamOneRemainingTime <= 0) {
+          newState.isOver = true;
+          newState.turn = "two";
+        }
+        this.setState(newState);
       } else if (this.state.turn == "two" && this.state.teamTwoRemainingTime > 0) {
-        this.setState({ teamTwoRemainingTime: this.state.teamTwoRemainingTime - 1 });
+        var newState = { teamTwoRemainingTime: this.state.teamTwoRemainingTime - 1 };
+        if (newState.teamTwoRemainingTime <= 0) {
+          newState.isOver = true;
+          newState.turn = "one";
+        }
+        this.setState(newState);
       }
     }
   }
@@ -229,16 +239,24 @@ class Game extends React.Component {
     return m + ":" + (s.length > 1 ? "" : "0") + s;
   }
 
+  renderVictoryScreen () {
+    return (<div className={ (this.state.player == "clue_giver" ? "controls" : "scoreboard") }>
+      <span className={ "score " + this.state.turn }>
+        { (this.state.turn == "one" ? "Communists" : "Capitalists") + " Win!" }
+      </span>
+    </div>);
+  }
+
   renderScoreBoard () {
     if (this.state.player == "board") {
       var team_name = <span className={ [this.state.turn, "score", "turn", (this.state.turn == "one" ? "turn-one" : "turn-two")].join(' ') }>
-        { this.state.turn == "one" ? "Party" : "Workers" }
+        { this.state.turn == "one" ? "Communists" : "Capitalists" }
       </span>;
     }
-    var team_one_time = <span className={ "one score" + (this.state.turn == "one" ? " active" : "") }>
+    var team_one_time = <span className={ "one time score" + (this.state.turn == "one" ? " active" : "") }>
       { this.formatTime(this.state.teamOneRemainingTime) }
     </span>;
-    var team_two_time = <span className={ "two score" + (this.state.turn == "two" ? " active" : "") }>
+    var team_two_time = <span className={ "two time score" + (this.state.turn == "two" ? " active" : "") }>
       { this.formatTime(this.state.teamTwoRemainingTime) }
     </span>;
     return (<div className={ (this.state.player == "clue_giver" ? "controls" : "scoreboard") }>
@@ -258,8 +276,14 @@ class Game extends React.Component {
     var board = this.state.gameState.map((row) => {
       return (<tr>{ row.map(this.formatWord) }</tr>);
     });
+    var topDisplay;
+    if (this.state.isOver) {
+      topDisplay = this.renderVictoryScreen();
+    } else {
+      topDisplay = this.renderScoreBoard();
+    }
     return (<div>
-      { this.renderScoreBoard() }
+      { topDisplay }
       <div className="game-div">
         <div className="center">
           <table className="game-table">{ board }</table>
@@ -295,13 +319,24 @@ class Game extends React.Component {
         >{ this.state.gameState[i][j].color ? "" : text }</td>);
       }) }</tr>);
     });
+    var controlButtons = [<button onClick={ this.handleReset.bind(this) }>Reset</button>];
+    if (!this.state.isOver) {
+      controlButtons = controlButtons.concat([
+        <button onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>,
+        <button onClick={ this.handlePass.bind(this) }>Pass</button>
+      ]);
+    }
     var controls = <div className="controls">
-      <button onClick={ this.handleReset.bind(this) }>Reset</button>
-      <button onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>
-      <button onClick={ this.handlePass.bind(this) }>Pass</button>
+      { controlButtons }
     </div>;
+    var topDisplay;
+    if (this.state.isOver) {
+      topDisplay = this.renderVictoryScreen();
+    } else {
+      topDisplay = this.renderScoreBoard();
+    }
     return (<div className="clue-giver">
-      { this.renderScoreBoard() }
+      { topDisplay }
       <div className="clue-wrapper center">
         <div className="clue-div">
           <table className="clue-table">{ clue_rows }</table>

@@ -21,7 +21,7 @@ game.prototype.initialize = function() {
   this.is_over = false;
   this.is_paused = true;
   this.last_move_made_at = null;
-  var game_time = 60 * 20;
+  var game_time = 20 * 60;
   this.team_data = {
     one: { time: game_time/2, remaining_words: 8 + (this.turn == 'one' ? 1 : 0) },
     two: { time: game_time/2, remaining_words: 8 + (this.turn == 'two' ? 1 : 0) }
@@ -88,6 +88,9 @@ game.prototype.reveal = function(coords) {
       this.team_data[this.turn].remaining_words -= 1;
       this.decrement_time();
     }
+    if (this.team_data[this.turn].remaining_words == 0) {
+      this.is_over = true;
+    }
   }
 }
 
@@ -110,14 +113,20 @@ game.prototype.decrement_time = function() {
   this.team_data[this.turn].time -= Math.floor((now - this.last_move_made_at)/1000);
   if (this.team_data[this.turn].time < 0) {
     this.team_data[this.turn].time = 0;
+    this.toggle_turn();
+    this.is_over = true;
   }
   this.last_move_made_at = now;
 }
 
+game.prototype.toggle_turn = function() {
+  this.turn = (this.turn == "one" ? "two" : "one")
+}
+
 game.prototype.pass_turn = function() {
-  if (!this.is_paused) {
+  if (!this.is_paused && !this.is_over) {
     this.decrement_time();
-    this.turn = (this.turn == "one" ? "two" : "one")
+    this.toggle_turn();
   }
 }
 
@@ -127,8 +136,12 @@ game.prototype.game_state = function(with_clues) {
     one: _.extend({}, this.team_data.one),
     two: _.extend({}, this.team_data.two)
   };
-  if (this.last_move_made_at) {
+  if (this.last_move_made_at && !this.is_over) {
     team_data_copy[this.turn].time -= Math.floor((Date.now() - this.last_move_made_at)/1000);
+    if (team_data_copy[this.turn].time < 0) {
+      team_data_copy[this.turn].time = 0;
+      this.decrement_time();
+    }
   }
 
   return {
