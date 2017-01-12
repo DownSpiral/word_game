@@ -22772,13 +22772,25 @@
 	    }
 	  }, {
 	    key: 'handleClueClick',
-	    value: function handleClueClick(i, j) {
-	      this.props.socket.emit('reveal', { x: j, y: i });
+	    value: function handleClueClick(i, j, evt) {
+	      if (!this.state.isPaused) {
+	        this.props.socket.emit('reveal', { x: j, y: i });
+	      }
+	    }
+	  }, {
+	    key: 'handleCancelReset',
+	    value: function handleCancelReset() {
+	      this.setState({ resetPrompt: false });
 	    }
 	  }, {
 	    key: 'handleReset',
 	    value: function handleReset() {
-	      this.props.socket.emit('reset');
+	      if (this.state.resetPrompt || this.state.isOver) {
+	        this.props.socket.emit('reset');
+	        this.setState({ resetPrompt: false });
+	      } else {
+	        this.setState({ resetPrompt: true });
+	      }
 	    }
 	  }, {
 	    key: 'handlePass',
@@ -22789,6 +22801,46 @@
 	    key: 'handlePlayPause',
 	    value: function handlePlayPause() {
 	      this.props.socket.emit('play_pause');
+	    }
+	  }, {
+	    key: 'renderControlButtons',
+	    value: function renderControlButtons() {
+	      var cancelReset, passTurn, playPause;
+	      var reset = _react2.default.createElement(
+	        'button',
+	        { onClick: this.handleReset.bind(this) },
+	        'Reset'
+	      );
+	      if (this.state.resetPrompt) {
+	        var cancelReset = _react2.default.createElement(
+	          'button',
+	          { onClick: this.handleCancelReset.bind(this) },
+	          'Cancel'
+	        );
+	      } else if (!this.state.isOver) {
+	        var passTurn = _react2.default.createElement(
+	          'button',
+	          { onClick: this.handlePass.bind(this) },
+	          'Pass'
+	        );
+	        var playPause = _react2.default.createElement(
+	          'button',
+	          {
+	            className: this.state.isPaused ? "play" : "",
+	            onClick: this.handlePlayPause.bind(this)
+	          },
+	          this.state.isPaused ? "Play" : "Pause"
+	        );
+	      }
+	
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'controls' },
+	        cancelReset,
+	        reset,
+	        playPause,
+	        passTurn
+	      );
 	    }
 	  }, {
 	    key: 'renderClueGiver',
@@ -22813,27 +22865,6 @@
 	          })
 	        );
 	      });
-	      var controlButtons = [_react2.default.createElement(
-	        'button',
-	        { onClick: this.handleReset.bind(this) },
-	        'Reset'
-	      )];
-	      if (!this.state.isOver) {
-	        controlButtons = controlButtons.concat([_react2.default.createElement(
-	          'button',
-	          { className: this.state.isPaused ? "play" : "", onClick: this.handlePlayPause.bind(this) },
-	          this.state.isPaused ? "Play" : "Pause"
-	        ), _react2.default.createElement(
-	          'button',
-	          { onClick: this.handlePass.bind(this) },
-	          'Pass'
-	        )]);
-	      }
-	      var controls = _react2.default.createElement(
-	        'div',
-	        { className: 'controls' },
-	        controlButtons
-	      );
 	      var topDisplay;
 	      if (this.state.isOver) {
 	        topDisplay = this.renderVictoryScreen();
@@ -22857,7 +22888,7 @@
 	            )
 	          )
 	        ),
-	        controls
+	        this.renderControlButtons()
 	      );
 	    }
 	  }, {

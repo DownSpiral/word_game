@@ -304,12 +304,23 @@ class Game extends React.Component {
     </div>);
   }
 
-  handleClueClick(i, j) {
-    this.props.socket.emit('reveal', { x: j, y: i });
+  handleClueClick(i, j, evt) {
+    if (!this.state.isPaused) {
+      this.props.socket.emit('reveal', { x: j, y: i });
+    }
+  }
+
+  handleCancelReset() {
+    this.setState({ resetPrompt: false });
   }
 
   handleReset() {
-    this.props.socket.emit('reset');
+    if (this.state.resetPrompt || this.state.isOver) {
+      this.props.socket.emit('reset');
+      this.setState({ resetPrompt: false });
+    } else {
+      this.setState({ resetPrompt: true });
+    }
   }
 
   handlePass() {
@@ -318,6 +329,29 @@ class Game extends React.Component {
 
   handlePlayPause() {
     this.props.socket.emit('play_pause');
+  }
+
+  renderControlButtons() {
+    var cancelReset, passTurn, playPause;
+    var reset = <button onClick={ this.handleReset.bind(this) }>Reset</button>;
+    if (this.state.resetPrompt) {
+      var cancelReset = <button onClick={ this.handleCancelReset.bind(this) }>Cancel</button>;
+    } else if (!this.state.isOver) {
+      var passTurn = <button onClick={ this.handlePass.bind(this) }>Pass</button>;
+      var playPause = <button
+        className={ this.state.isPaused ? "play" : "" }
+        onClick={ this.handlePlayPause.bind(this) }
+      >
+        { this.state.isPaused ? "Play" : "Pause" }
+      </button>;
+    }
+
+    return (<div className="controls">
+      { cancelReset }
+      { reset }
+      { playPause }
+      { passTurn }
+    </div>);
   }
 
   renderClueGiver () {
@@ -331,16 +365,6 @@ class Game extends React.Component {
         >{ this.state.gameState[i][j].color ? "" : text }</td>);
       }) }</tr>);
     });
-    var controlButtons = [<button onClick={ this.handleReset.bind(this) }>Reset</button>];
-    if (!this.state.isOver) {
-      controlButtons = controlButtons.concat([
-        <button className={ this.state.isPaused ? "play" : "" } onClick={ this.handlePlayPause.bind(this) }>{ this.state.isPaused ? "Play" : "Pause" }</button>,
-        <button onClick={ this.handlePass.bind(this) }>Pass</button>
-      ]);
-    }
-    var controls = <div className="controls">
-      { controlButtons }
-    </div>;
     var topDisplay;
     if (this.state.isOver) {
       topDisplay = this.renderVictoryScreen();
@@ -354,7 +378,7 @@ class Game extends React.Component {
           <table className="clue-table">{ clue_rows }</table>
         </div>
       </div>
-      { controls }
+      { this.renderControlButtons() }
     </div>);
   }
 
