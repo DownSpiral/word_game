@@ -253,3 +253,45 @@ span, div {
 *:focus {
   outline: none;
 }
+
+@-webkit-keyframes snow {
+  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
+  50% { background-color: #b4cfe0 }
+  100% {
+    background-position: 500px 1000px, 400px 400px, 300px 300px;
+  }
+}
+@-moz-keyframes snow {
+  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
+  50% { background-color: #b4cfe0 }
+  100% {
+    background-position: 500px 1000px, 400px 400px, 300px 300px;
+  }
+}
+@-ms-keyframes snow {
+  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
+  50% { background-color: #b4cfe0 }
+  100% {
+    background-position: 500px 1000px, 400px 400px, 300px 300px;
+  }
+}
+@keyframes snow {
+  0% { background-position: 0px 0px, 0px 0px, 0px 0px }
+  100% {
+    background-position: 500px 1000px, 400px 400px, 300px 300px;
+  }
+}
+
+body {
+  background-image: url("../../public/images/soviet-blue-background-small.jpg");
+  margin: 0px;
+  background-size: cover;
+}
+
+#app {
+  background-image: url('http://i.imgur.com/BiSmXaq.png'), url('http://i.imgur.com/XHuy0NJ.png');
+  -webkit-animation: snow 25s linear infinite;
+  -moz-animation: snow 25s linear infinite;
+  -ms-animation: snow 25s linear infinite;
+  animation: snow 25s linear infinite;
+}
